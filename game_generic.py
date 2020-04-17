@@ -22,6 +22,41 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+"""
+## Description:
+    This is a MO2 plugin that allows users to install mods in an arbitrary location.
+    This is a suboptimal solution with obvious compromises such as orphaned ui elements of
+    features that are missing like the empty plugins tab.
+    
+    There are also inherent limitations to which files can be virtualized, derived from the MO2 VFS. 
+    Specifically load-time linked dlls such as d3dx9_42.dll will not get properly virtualized to programs
+    as those are loaded before the Virtual Library dll can be loaded (one of the reasons for which Mo2 
+    does not support mods that install in the game directory as most of those are dlls).
+
+## Installation:
+    Drop game_generic.py inside the MO2 Plugins folder, inside the MO2 install directory.
+
+## Usage:
+    Open MO2 and create a new instance and choose a name for it. Mo2 will then ask you to 
+    either select a game from the list of detected ones or browse to a game directory.
+    Select the Browse option and choose the folder in which you want Mo2 to put the mod files.
+    A new generic instance will be generated.
+
+    Attention! If this plugin is installed you might accidentally create a generic instance 
+    instead of one of another supported game. It's advised to not have this plugin installed
+    when creating instances for actually supported games.
+
+## Supporting a specific game:
+    By editing some of the contents of this plugin it can be adapted to rudimentally support 
+    a specific game in better capacity than just defining a target folder.
+    All the required fields to be filled have been commented to help understand what they 
+    are meant to do. 
+    This file is released under MIT license so feel free to adapt it to a specific game
+    and distribute it.
+    For more information please visit the MO2 Development Discord server: https://discord.gg/5tCqt6V
+"""
+
+
 import sys
 import os
 
@@ -308,7 +343,8 @@ class GenericGame(mobase.IPluginGame):
         """
         @return true if this game has been discovered as installed, false otherwise.
         
-        Used to allow fast instance creation.
+        Used to allow fast instance creation. This function can be used to check
+        registry keys for the path of the game and setting the internal game/data directories.
         """
         return False
     
