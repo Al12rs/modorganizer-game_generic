@@ -47,7 +47,7 @@ SOFTWARE.
     when creating instances for actually supported games.
 
 ## Supporting a specific game:
-    By editing some of the contents of this plugin, it can be adapted to rudimentally support 
+    By editing some of the contents of this plugin, it can be adapted to rudimentarily support 
     a specific game in better capacity than just defining a target folder.
     All the required fields to be filled have been commented to help understand what they 
     are meant to do. You can check the very well made Qt online documentation for Qt types used.
@@ -62,6 +62,7 @@ SOFTWARE.
 
 import sys
 import os
+import pathlib
 
 from PyQt5.QtCore import QCoreApplication, QDateTime, QDir, QFileInfo
 from PyQt5.QtGui import QIcon
@@ -236,6 +237,8 @@ class GenericGame(mobase.IPluginGame):
     def executables(self):
         """
         @return list of automatically discovered executables of the game itself and tools surrounding it.
+        This is a list of 
+            mobase.ExecutableInfo("Display name", QFileInfo("absolute/path/to/exe"))
         """
         return []
 
