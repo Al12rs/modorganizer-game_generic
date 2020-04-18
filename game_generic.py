@@ -210,7 +210,7 @@ class GenericGame(mobase.IPluginGame):
     
     def nexusGameID(self):
         """
-        @brief Get the Nexus Game ID.
+        @brief Get the Nexus Game ID (you may find this in a download link from nexus).
         """
         return 0
     
@@ -224,13 +224,13 @@ class GenericGame(mobase.IPluginGame):
     
     def binaryName(self):
         """
-        @brief Get the name of the executable that gets run
+        @brief Get the name of the executable that gets run.
         """
         return ""
     
     def getLauncherName(self):
         """
-        @brief Get the name of the game launcher
+        @brief Get the name of the game launcher.
         """
         return ""
 
