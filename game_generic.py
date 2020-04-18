@@ -64,7 +64,7 @@ import sys
 import os
 import pathlib
 
-from PyQt5.QtCore import QCoreApplication, QDateTime, QDir, QFileInfo
+from PyQt5.QtCore import QCoreApplication, QDateTime, QDir, QFileInfo, QStandardPaths
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMessageBox
 
@@ -107,10 +107,15 @@ class GenericGame(mobase.IPluginGame):
     """
     
     def init(self, organizer):
+        """
+        Initialize the plugin here.
+        If you are able to detect game installation you may do so here and already set the various paths.
+        MO2 will call setGamePath() in case the user already has an instance or selects a custom location.
+        """
         self.__featureMap[mobase.GamePlugins] = GenericGameGamePlugins(organizer)
-        self.m_GameDir=QDir()
-        self.m_DataDir=QDir()
-        self.m_DocumentsDir=QDir()
+        self.m_GamePath=""
+        self.m_DataPath=""
+        self.m_DocumentsPath=""
         return True
 
     def name(self):
@@ -357,15 +362,15 @@ class GenericGame(mobase.IPluginGame):
     
     def gameDirectory(self):
         """
-        @return directory to the game installation.
+        @return directory (QDir) to the game installation.
         """
-        return self.m_GameDir
+        return QDir(self.m_GamePath)
     
     def dataDirectory(self):
         """
-        @return directory where the game expects to find its data files (virtualization target).
+        @return directory (QDir) where the game expects to find its data files (virtualization target).
         """
-        return self.m_DataDir
+        return QDir(self.m_DataPath)
     
     def setGamePath(self, pathStr):
         """
@@ -374,14 +379,14 @@ class GenericGame(mobase.IPluginGame):
         @note this will be called by by MO to set the concrete path of the game. This is particularly
             relevant if the path wasn't auto-detected but had to be set manually by the user.
         """
-        self.m_GameDir=QDir(pathStr)
-        self.m_DataDir=self.m_GameDir
+        self.m_GamePath=pathStr
+        self.m_DataPath=self.m_GamePath
     
     def documentsDirectory(self):
         """
-        @return directory of the documents folder where configuration files and such for this game reside.
+        @return directory (QDir) of the documents folder where configuration files and such for this game reside.
         """
-        return QDir("{}/My Games".format(os.getenv("CSIDL_MYDOCUMENTS")))
+        return QDir("{}/My Games".format(QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation)))
     
     def savesDirectory(self):
         """
