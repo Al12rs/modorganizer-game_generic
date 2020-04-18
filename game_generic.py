@@ -239,6 +239,7 @@ class GenericGame(mobase.IPluginGame):
         @return list of automatically discovered executables of the game itself and tools surrounding it.
         This is a list of 
             mobase.ExecutableInfo("Display name", QFileInfo("absolute/path/to/exe"))
+        The path can either be absolute or relative to the gameDirectory.
         """
         return []
 
