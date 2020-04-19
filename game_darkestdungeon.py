@@ -61,10 +61,12 @@ SOFTWARE.
 
 import sys
 import os
+import winreg
+import re
 
-from PyQt5.QtCore import QCoreApplication, QDateTime, QDir, QFileInfo
+from PyQt5.QtCore import QCoreApplication, QDateTime, QDir, QFileInfo, QStandardPaths
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QFileIconProvider
 
 if "mobase" not in sys.modules:
     import mock_mobase as mobase
@@ -106,9 +108,9 @@ class DarkestDungeon(mobase.IPluginGame):
     
     def init(self, organizer):
         self.__featureMap[mobase.GamePlugins] = DarkestDungeonGamePlugins(organizer)
-        self.m_GameDir=QDir()
-        self.m_DataDir=QDir()
-        self.m_DocumentsDir=QDir()
+        self.m_GameDir=""
+        self.m_DataDir=""
+        self.m_DocumentsDir=""
         return True
 
     def name(self):
@@ -182,7 +184,8 @@ class DarkestDungeon(mobase.IPluginGame):
         """
         @return an icon for this game (QIcon constructor accepts a path).
         """
-        return QIcon()
+        "QFileIconProvider().icon(QFileInfo(self.m_GameDir, \"_windows/Darkest.exe\"))"
+        return QIcon("plugins/data/icons/darkestdungeon.jpg")
 
     def validShortNames(self):
         """
@@ -357,7 +360,15 @@ class DarkestDungeon(mobase.IPluginGame):
         HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App 262060 has InstallLocation
         https://github.com/ModOrganizer2/modorganizer-game_gamebryo/blob/master/src/gamebryo/gamegamebryo.cpp#L299
         """
-        return False
+        try:
+            RawKey = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App 262060")
+            Key = winreg.QueryValueEx(RawKey, "InstallLocation")
+            winreg.CloseKey(RawKey)
+            Dir = re.search("'(.*)'", str(Key))
+            self.setGamePath(str(Dir[1]))
+            return True
+        except:
+            return False
     
     def gameDirectory(self):
         """
