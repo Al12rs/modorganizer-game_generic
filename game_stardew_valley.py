@@ -63,10 +63,12 @@ SOFTWARE.
 import sys
 import os
 import pathlib
+import re
+import winreg
 
 from PyQt5.QtCore import QCoreApplication, QDateTime, QDir, QFileInfo, QStandardPaths
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QFileIconProvider
 
 if "mobase" not in sys.modules:
     import mock_mobase as mobase
@@ -93,13 +95,13 @@ class GenericGameGamePlugins(mobase.GamePlugins):
     def getLoadOrder(self, loadOrder):
         return
 
-class GenericGame(mobase.IPluginGame):
+class StardewValley(mobase.IPluginGame):
     """
     Actual plugin class, extends the IPluginGame interface, meaning it adds support for a new game.
     """
 
     def __init__(self):
-        super(GenericGame, self).__init__()
+        super(StardewValley, self).__init__()
         self.__featureMap = {}
 
     """
@@ -125,7 +127,7 @@ class GenericGame(mobase.IPluginGame):
         Do NOT use a localizable string (tr()) here.
         Settings for example are tied to this name, if you rename your plugin you lose settings users made.
         """
-        return "GenericGamePlugin"
+        return "StardewValley"
 
     def author(self):
         """
@@ -133,13 +135,13 @@ class GenericGame(mobase.IPluginGame):
         AnyOldName3 for initial fake game mock implementation,
         AL12 for generic game support and documentation comments,
         """
-        return "AnyOldName3, AL12"
+        return "AnyOldName3, AL12, Syer10"
 
     def description(self):
         """
         @return a short description of the plugin to be displayed to the user
         """
-        return self.__tr("Adds support for a generic game (this is basically a hack, so expect some features to not work or be unavailable).")
+        return self.__tr("Adds support for a Stardew Valley (this is basically a hack, so expect some features to not work or be unavailable).")
 
     def version(self):
         """
@@ -173,7 +175,7 @@ class GenericGame(mobase.IPluginGame):
         """
         @return name of the game.
         """
-        return "Generic Game"
+        return "Stardew Valley"
     
     def gameShortName(self):
         """
@@ -182,13 +184,13 @@ class GenericGame(mobase.IPluginGame):
         The short name of the game is used for savegames, registry entries,
         Nexus API calls and some MO2 internal settings storage.
         """
-        return "GenericGame"
+        return "stardewvalley"
     
     def gameIcon(self):
         """
         @return an icon for this game (QIcon constructor accepts a path).
         """
-        return QIcon()
+        return QFileIconProvider().icon(QFileInfo(self.gameDirectory(), "Stardew Valley.exe"))
 
     def validShortNames(self):
         """
@@ -204,7 +206,7 @@ class GenericGame(mobase.IPluginGame):
         """
         @brief get the Nexus name of the game, used for API calls and for mod pages resolution.
         """
-        return ""
+        return "stardewvalley"
     
     def nexusModOrganizerID(self):
         """
@@ -217,7 +219,7 @@ class GenericGame(mobase.IPluginGame):
         """
         @brief Get the Nexus Game ID (you may find this in a download link from nexus).
         """
-        return 0
+        return 1303
     
     def steamAPPId(self):
         """
@@ -225,17 +227,17 @@ class GenericGame(mobase.IPluginGame):
         @note if a game is available in multiple versions those might have different app ids.
             the plugin should try to return the right one
         """
-        return ""
+        return "413150"
     
     def binaryName(self):
         """
-        @brief Get the name of the executable that gets run.
+        @brief Get the name of the executable that gets run
         """
-        return ""
+        return "Stardew Valley.exe"
     
     def getLauncherName(self):
         """
-        @brief Get the name of the game launcher.
+        @brief Get the name of the game launcher
         """
         return ""
 
@@ -246,7 +248,8 @@ class GenericGame(mobase.IPluginGame):
             mobase.ExecutableInfo("Display name", QFileInfo("absolute/path/to/exe"))
         The path can either be absolute or relative to the gameDirectory.
         """
-        return []
+        return [mobase.ExecutableInfo("SMAPI", QFileInfo(self.gameDirectory(), "StardewModdingAPI.exe")),
+        mobase.ExecutableInfo("Stardew Valley", QFileInfo(self.gameDirectory(), "Stardew Valley.exe"))]
 
     def savegameExtension(self):
         """
@@ -349,7 +352,10 @@ class GenericGame(mobase.IPluginGame):
         """
         @brief See if the supplied directory looks like a valid installation of the game.
         """
-        return True
+        if QDir(''.join([aQDir.absolutePath(), '\\', 'Content'])).exists() and QFileInfo(aQDir, 'Stardew Valley.exe').exists():
+            return True
+        else:
+            return False
     
     def isInstalled(self):
         """
@@ -358,7 +364,15 @@ class GenericGame(mobase.IPluginGame):
         Used to allow fast instance creation. This function can be used to check
         registry keys for the path of the game and setting the internal game/data directories.
         """
-        return False
+        try:
+            RawKey = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App 413150")
+            Key = winreg.QueryValueEx(RawKey, "InstallLocation")
+            winreg.CloseKey(RawKey)
+            Dir = re.search("'(.*)'", str(Key))
+            self.setGamePath(str(Dir[1]))
+            return True
+        except:
+            return False
     
     def gameDirectory(self):
         """
@@ -380,13 +394,13 @@ class GenericGame(mobase.IPluginGame):
             relevant if the path wasn't auto-detected but had to be set manually by the user.
         """
         self.m_GamePath=pathStr
-        self.m_DataPath=self.m_GamePath
+        self.m_DataPath=''.join([pathStr, '\\', 'mods'])
     
     def documentsDirectory(self):
         """
         @return directory (QDir) of the documents folder where configuration files and such for this game reside.
         """
-        return QDir("{}/My Games".format(QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation)))
+        return QDir("{}/StardewValley/Saves".format(QStandardPaths.writableLocation(QStandardPaths.AppDataLocation)))
     
     def savesDirectory(self):
         """
@@ -405,7 +419,7 @@ class GenericGame(mobase.IPluginGame):
         return self.__featureMap
     
     def __tr(self, str):
-        return QCoreApplication.translate("GenericGame", str)
+        return QCoreApplication.translate("StardewValley", str)
     
 def createPlugin():
-    return GenericGame()
+    return StardewValley()
