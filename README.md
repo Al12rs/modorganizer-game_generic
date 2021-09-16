@@ -1,3 +1,6 @@
+# DEPRECATED
+instead refer to  https://github.com/ModOrganizer2/modorganizer-basic_games
+
 # modorganizer-game_generic
 This repository retains a Mod Organizer 2 pluging to manage a generic folder, as well as modifications of this plugin to support specific games.
 
